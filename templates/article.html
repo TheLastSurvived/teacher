@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+{% block title %}
+{{article.title}}
+{% endblock %}
+
+{% block main %}
+{{ ckeditor.load() }}
+<main>
+    
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Изменить</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <h3>Название</h3>
+                            <input type="text" class="form-control" placeholder="Имя" required name="title"
+                                value="{{article.title}}">
+                        </div>
+
+
+                        <div class="mb-3">
+                            <h3>Категория</h3>
+                            <input type="text" class="form-control" placeholder="Категория" required name="category"
+                                value="{{article.category}}">
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleInputEmail1" class="form-label">Изображение</label>
+                            <input type="file" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                                name="image" accept=".jpg,.jpeg,.png">
+                        </div>
+                        <div class="mb-3">
+                            <h3>Описание</h3>
+                            {{ ckeditor.create(value=article.text) }}
+                        </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {%if 'name' in session and active_user.root==1%}
+    <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Изменить
+    </button>
+    <a href="/delete-article/{{article.id}}" class="btn btn-danger my-3">Удалить</a>
+    {%endif%}
+
+    {% with messages = get_flashed_messages(True) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <p class="m-2 flash {{category}}">{{message}}</p>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <div class="row">
+
+        <div class="col-md-8">
+            <img src="../static/img/upload/{{article.image_name}}" alt="" class="img-fluid">
+            <h1>{{article.title}}</h1>
+            <h3>Категория: {{article.category}}</h3>
+            <h3>Дата: {{article.date.strftime('%d.%m.%Y %H:%M')}}</h3>
+            <h3>Содержание</h3>
+            {% autoescape false %}
+            {{article.text}}
+            {% endautoescape %}
+
+
+        </div>
+        <div class="col-md-4">
+            <h3>Другие посты:</h3>
+
+            {%for article in articles_random%}
+            <div class="border p-3 mb-3 text-center">
+                <a href="/article/{{article.id}}" class="link-dark d-flex justify-content-center flex-column">
+                    <img src="../static/img/upload/{{article.image_name}}" class="img-fluid" alt="">
+                    <p class="m-2">{{article.title}}</p>
+                </a>
+            </div>
+            {%endfor%}
+
+        </div>
+    </div>
+
+</main>
+{% endblock %}

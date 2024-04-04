@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% block title %}
+Профиль
+{% endblock %}
+
+{% block main %}
+
+<main class="">
+    <div class="row">
+        <div class="col-md-8">
+            {% with messages = get_flashed_messages(True) %}
+            {% if messages %}
+            {% for category, message in messages %}
+            <p class="m-2 flash {{category}}">{{message}}</p>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+            <form class="" method="post">
+                <h2 class="">Изменить данные</h2>
+                <div class="mb-3">
+                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        placeholder="Имя" required name="name" value="{{active_user.name}}">
+                </div>
+                <div class="mb-3">
+                    <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        placeholder="Email" required name="email" value="{{active_user.email}}">
+                </div>
+                <div class="mb-3">
+                    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Пароль" required
+                        name="password" value="">
+                </div>
+                <button type="submit" class="btn btn-primary">Изменить</button>
+            </form>
+        </div>
+        <div class="col-md-4">
+            <h2>Мои данные</h2>
+            <h3>Имя: {{active_user.name}}</h3>
+            <h3>Почта: {{active_user.email}}</h3>
+        </div>
+    </div>
+
+    <div class="album py-5 ">
+        <div class="container">
+            <h2>Мои репетиторы:</h2>
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+                {%if teacher_list%}
+                {%for teacher in teacher_list%}
+                <div class="col">
+                    <div class="card shadow-sm">
+                        <img src="../static/img/upload/{{teacher.image_name}}" alt="">
+                        <div class="card-body">
+                            <p class="card-text">{{teacher.name}} {{teacher.surname}}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="btn-group">
+                                    <a href="/teacher/{{teacher.id}}" class="btn btn-sm btn-outline-secondary">Просмотр</a>
+                                </div>
+                                <small class="text-body-secondary">{{teacher.subject}}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {%endfor%}
+                {%else%}
+                    <h3>Список пуст!</h3>
+                {%endif%}
+               
+
+
+              
+
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

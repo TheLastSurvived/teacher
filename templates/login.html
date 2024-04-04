@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}
+Вход
+{% endblock %}
+
+{% block main %}
+
+<main class="">
+
+    <form class="w-50 mx-auto" method="post">
+        <h1 class="">Вход</h1>
+        {% with messages = get_flashed_messages(True) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <p class="m-2 flash {{category}}">{{message}}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="mb-3">
+            <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                placeholder="Email" required name="email">
+        </div>
+        <div class="mb-3">
+            <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Пароль" required name="password">
+        </div>
+        <button type="submit" class="btn btn-primary">Войти</button>
+    </form>
+</main>
+{% endblock %}

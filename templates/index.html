@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}
+TEACHER
+{% endblock %}
+
+
+
+{% block main %}
+{{ ckeditor.load() }}
+<div class="nav-scroller py-1 mb-3 border-bottom">
+    <h2>Категории:</h2>
+    <nav class="nav nav-underline">
+        <a class="nav-item nav-link link-body-emphasis " href="/">Все</a>
+        {%for subject in subjects%}    
+        <a class="nav-item nav-link link-body-emphasis" href="/?subject={{subject.subject}}">{{subject.subject}}</a>
+        {%endfor%}
+    </nav>
+</div>
+<main>
+    
+    {%if 'name' in session and active_user.root==1%}
+    <!-- Кнопка-триггер модального окна -->
+    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal">
+        Добавить преподавателя
+    </button>
+    {%endif%}
+
+
+    {% with messages = get_flashed_messages(True) %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <p class="m-2 flash {{category}}">{{message}}</p>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <!-- Модальное окно -->
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Добавление преподавателя</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="post" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Имя" required name="name">
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Фамилия" required name="surname">
+                        </div>
+                        <div class="mb-3">
+                            <input type="number" class="form-control" placeholder="Цена" required name="price">
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Категория" required name="category">
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleInputEmail1" class="form-label">Изображение</label>
+                            <input type="file" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                                name="image" accept=".jpg,.jpeg,.png" required>
+                        </div>
+                        <div class="mb-3">
+                            <h3>Описание</h3>
+                            {{ ckeditor.create() }}
+                        </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                    <button type="submit" class="btn btn-primary">Добавить</button>
+                </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="album py-5">
+        <div class="row row-cols-sm-2 g-3">
+            {%for teacher in teachers%}
+            <div class="col">
+                <div class="card shadow-sm">
+                    <img src="../static/img/upload/{{teacher.image_name}}" height="" alt="">
+                    <div class="card-body">
+                        <h4>{{teacher.name}} {{teacher.surname}}</h4>
+                 
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="btn-group">
+                                <a href="/teacher/{{teacher.id}}" class="btn btn-sm btn-outline-secondary">Смотреть</a>
+                            </div>
+                            <small class="text-body-secondary">{{teacher.subject}}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {%endfor%}
+
+
+        </div>
+
+    </div>
+
+</main>
+{% endblock %}

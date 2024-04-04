@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block title %}
+Репетитор {{teacher.name}} {{teacher.surname}}
+{% endblock %}
+
+{% block main %}
+{{ ckeditor.load() }}
+<main>
+
+    <div class="row">
+        {% with messages = get_flashed_messages(True) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <p class="m-2 flash {{category}}">{{message}}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="col-md-6">
+            <img src="../static/img/upload/{{teacher.image_name}}" alt="" class="img-fluid">
+        </div>
+        <div class="col-md-6">
+            <h1>{{teacher.name}} {{teacher.surname}}</h1>
+            <h3>Дисциплина: {{teacher.subject}}</h3>
+            <h3>Цена: {{teacher.price}}/ч</h3>
+            <h3>Описание</h3>
+            {% autoescape false %}
+            {{teacher.desciption}}
+            {% endautoescape %}
+
+            {%if 'name' in session and teacher.id not in id_list%}
+            <a href="/order/{{teacher.id}}" class="btn btn-primary">Заказать репетитора</a>
+
+            {%elif teacher.id in id_list%}
+            <a href="/order-delete/{{teacher.id}}" class="btn btn-outline-danger">Отказаться от репетитора</a>
+            {%else%}
+            <h3>Заказать репетитора можно только зарегестрированным пользователям!</h3>
+            {%endif%}
+
+
+            {%if 'name' in session and active_user.root==1%}
+            <!-- Кнопка-триггер модального окна -->
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Изменить
+            </button>
+
+            <a href="/delete-teacher/{{teacher.id}}" class="btn btn-danger">Удалить</a>
+            {%endif%}
+            <!-- Модальное окно -->
+
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Изменить</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Закрыть"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" enctype="multipart/form-data">
+                                <div class="mb-3">
+                                    <h3>Имя</h3>
+                                    <input type="text" class="form-control" placeholder="Имя" required name="name"
+                                        value="{{teacher.name}}">
+                                </div>
+                                <div class="mb-3">
+                                    <h3>Фамилия</h3>
+                                    <input type="text" class="form-control" placeholder="Фамилия" required
+                                        name="surname" value="{{teacher.surname}}">
+                                </div>
+                                <div class="mb-3">
+                                    <h3>Цена\час</h3>
+                                    <input type="number" class="form-control" placeholder="Цена" required name="price"
+                                        value="{{teacher.price}}">
+                                </div>
+                                <div class="mb-3">
+                                    <h3>Категория</h3>
+                                    <input type="text" class="form-control" placeholder="Категория" required
+                                        name="category" value="{{teacher.subject}}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exampleInputEmail1" class="form-label">Изображение</label>
+                                    <input type="file" class="form-control" id="exampleInputEmail1"
+                                        aria-describedby="emailHelp" name="image" accept=".jpg,.jpeg,.png">
+                                </div>
+                                <div class="mb-3">
+                                    <h3>Описание</h3>
+                                    {{ ckeditor.create(value=teacher.desciption) }}
+                                </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</main>
+{% endblock %}
