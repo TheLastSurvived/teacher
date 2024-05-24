@@ -4,7 +4,7 @@
 {% endblock %}
 
 {% block main %}
-
+{{ ckeditor.load() }}
 <main class="">
     <div class="row">
         <div class="col-md-8">
@@ -22,6 +22,10 @@
                         placeholder="Имя" required name="name" value="{{active_user.name}}">
                 </div>
                 <div class="mb-3">
+                    <input type="text" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+                        placeholder="Фамилия" required name="surname" value="{{active_user.surname}}">
+                </div>
+                <div class="mb-3">
                     <input type="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
                         placeholder="Email" required name="email" value="{{active_user.email}}">
                 </div>
@@ -34,25 +38,161 @@
         </div>
         <div class="col-md-4">
             <h2>Мои данные</h2>
+            <img src="../static/img/upload/{{teacher.image_name}}" alt="" class="img-fluid">
             <h3>Имя: {{active_user.name}}</h3>
+            <h3>Фамилия: {{active_user.surname}}</h3>
             <h3>Почта: {{active_user.email}}</h3>
+
+            {%if 'name' in session and active_user.root==2%}
+            <button type="button" class="btn btn-outline-warning my-3" data-bs-toggle="modal"
+                data-bs-target="#exampleModal">
+                Редактировать анкету репетитора
+            </button>
+
+
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Изменить</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Закрыть"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" enctype="multipart/form-data"
+                                action="{{url_for('edit_teacher', id=teacher.id) }}">
+
+                                <div class="mb-3">
+                                    <h3>Цена\час</h3>
+                                    <input type="number" class="form-control" placeholder="Цена" required name="price"
+                                        value="{{teacher.price}}">
+                                </div>
+                                <div class="mb-3">
+                                    <h3>Категория</h3>
+                                    <input type="text" class="form-control" placeholder="Категория" required
+                                        name="category" value="{{teacher.subject}}">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exampleInputEmail1" class="form-label">Изображение</label>
+                                    <input type="file" class="form-control" id="exampleInputEmail1"
+                                        aria-describedby="emailHelp" name="image" accept=".jpg,.jpeg,.png">
+                                </div>
+                                <div class="mb-3">
+                                    <h3>Описание</h3>
+                                    {{ ckeditor.create(value=teacher.desciption) }}
+                                </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+
+            <a href="/delete-teacher/{{teacher.id}}" class="btn btn-outline-danger">Удалить анкету репетитора</a>
+            {%endif%}
+
+            {%if 'name' in session and active_user.root==0%}
+            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                Заполнить анкету репетитора
+            </button>
+
+            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Заполнить анкету репетитора</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                aria-label="Закрыть"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" enctype="multipart/form-data"
+                                action="{{url_for('add_teacher', id_user=active_user.id) }}">
+                                <div class="mb-3">
+                                    <input type="number" class="form-control" placeholder="Цена в час" required
+                                        name="price">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" placeholder="Предмет" required
+                                        name="category">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="exampleInputEmail1" class="form-label">Изображение</label>
+                                    <input type="file" class="form-control" id="exampleInputEmail1"
+                                        aria-describedby="emailHelp" name="image" required accept=".jpg,.jpeg,.png">
+                                </div>
+                                <div class="mb-3">
+                                    <h3>Описание</h3>
+                                    {{ ckeditor.create() }}
+                                </div>
+
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            <button type="submit" class="btn btn-primary">Заполнить</button>
+                        </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {%endif%}
+
         </div>
+
+
     </div>
 
+    {%if active_user.root==2 %}
+    <div class="my-5">
+        <h2>Список учащихся</h2>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th scope="col">Email</th>
+                    <th scope="col">Имя</th>
+                    <th scope="col">Фамилия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {%for student in student_list%}
+                <tr>
+                  
+                    <td> {{student.email}}</td>
+                    <td> {{student.name}}</td>
+                    <td> {{student.surname}}</td>
+                  
+                </tr>
+                {%endfor%}
+            </tbody>
+        </table>
+    </div>
+   
+    {%endif%}
+
+
+
+    {%if not active_user.root==1 and not active_user.root==2%}
     <div class="album py-5 ">
         <div class="container">
             <h2>Мои репетиторы:</h2>
             <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
                 {%if teacher_list%}
-                {%for teacher in teacher_list%}
+                {%for teacher,user in zip(teacher_list,user_list)%}
                 <div class="col">
                     <div class="card shadow-sm">
                         <img src="../static/img/upload/{{teacher.image_name}}" alt="">
                         <div class="card-body">
-                            <p class="card-text">{{teacher.name}} {{teacher.surname}}</p>
+                            <p class="card-text">{{user.name}} {{user.surname}}</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <div class="btn-group">
-                                    <a href="/teacher/{{teacher.id}}" class="btn btn-sm btn-outline-secondary">Просмотр</a>
+                                    <a href="/teacher/{{teacher.id}}"
+                                        class="btn btn-sm btn-outline-secondary">Просмотр</a>
                                 </div>
                                 <small class="text-body-secondary">{{teacher.subject}}</small>
                             </div>
@@ -61,15 +201,19 @@
                 </div>
                 {%endfor%}
                 {%else%}
-                    <h3>Список пуст!</h3>
+                <h3>Список пуст!</h3>
                 {%endif%}
-               
 
 
-              
+
+
 
             </div>
         </div>
     </div>
+    {%endif%}
+
+
+
 </main>
 {% endblock %}

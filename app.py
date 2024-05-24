@@ -25,6 +25,7 @@ ckeditor = CKEditor(app)
 class Users(db.Model):
     id = db.Column(db.Integer,primary_key=True)
     name = db.Column(db.String(100))
+    surname = db.Column(db.String(100))
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100), unique=True)
     root = db.Column(db.Integer, default=0)
@@ -47,12 +48,12 @@ class Articles(db.Model):
 
 class Teachers(db.Model):
     id = db.Column(db.Integer,primary_key=True)
-    name = db.Column(db.String(100))
-    surname = db.Column(db.String(100))
     desciption = db.Column(db.Text)
     price = db.Column(db.Integer)
     subject = db.Column(db.String(100))
     image_name = db.Column(db.String(100))
+    id_user = db.Column(db.Integer, db.ForeignKey('users.id'))
+    status = db.Column(db.Integer, default=0)
    
     def __repr__(self):
         return 'Teachers %r' % self.id 
@@ -86,17 +87,32 @@ class OrdersView(ModelView):
     column_display_pk = True 
     column_hide_backrefs = False
     column_list = ['id','id_user','id_teacher']
-
+    
+    
+class TeachersView(ModelView):
+    column_display_pk = True 
+    column_hide_backrefs = False
+    column_list = ['id','desciption','price','subject','image_name','id_user']
+    
 
 admin.add_view(ModelView(Users, db.session))
 admin.add_view(ModelView(Articles, db.session))
-admin.add_view(ModelView(Teachers, db.session))
+admin.add_view(TeachersView(Teachers, db.session))
 admin.add_view(OrdersView(Orders, db.session))
 
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     teachers = Teachers.query.all()
+    
+    users_ids = []
+    for teacher in teachers:
+        users_ids.append(teacher.id_user)
+        
+    users_list = []
+    for id in users_ids:
+        users_list.append(Users.query.get(id))
+        
     if request.method == 'POST':
         name = request.form.get('name')
         surname = request.form.get('surname')
@@ -119,11 +135,32 @@ def index():
             subject= subject.capitalize()
             subject = "%{}%".format(subject)
             teachers = Teachers.query.filter(Teachers.subject.like(subject)).all()
-            return render_template("index.html",teachers=teachers)
+            return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list)
         else:
-             return render_template("index.html",teachers=teachers)
+             return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list)
 
-    return render_template("index.html",teachers=teachers)
+    return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list)
+
+
+@app.route('/add_teacher/<int:id_user>', methods=['GET', 'POST'])
+def add_teacher(id_user):
+    if not 'name' in session:
+        abort(401)
+    total_user = Users.query.filter_by(id=id_user).first()
+    total_user.root = 2
+    if request.method == 'POST':
+        subject = request.form.get('category')
+        price = request.form.get('price')
+        desciption = request.form.get('ckeditor')
+        image = request.files['image']
+        filename = secure_filename(image.filename)
+        pic_name = str(uuid.uuid4()) + "_" + filename
+        image.save("static/img/upload/" + pic_name)
+        teacher = Teachers(price=price, subject=subject,desciption=desciption,image_name=pic_name,id_user=total_user.id)
+        db.session.add(teacher)
+        db.session.commit()
+        flash("Запись добавлена!", category="ok")
+    return redirect(url_for("profile"))
 
 
 @app.route('/about', methods=['GET', 'POST'])
@@ -190,17 +227,41 @@ def blog():
 def profile():
     if not 'name' in session:
         abort(401)
+   
     total_user = Users.query.filter_by(email=session['name']).first()
+    
     id_list = []
     teacher_list = []
+    teacher = object
+    orders_teacher = []
+    
+    
     
     total_user = Users.query.filter_by(email=session['name']).first()
     orders = Orders.query.filter_by(id_user=total_user.id).all()
+    
+    
+    teacher = Teachers.query.filter_by(id_user=total_user.id).first()
+    if teacher:
+        orders_teacher = Orders.query.filter_by(id_teacher=teacher.id).all()
+    
+    student_list = []
+    
+    for el in orders_teacher:
+        student_list.append(Users.query.get(el.id_user))
+    
     for order in orders:
         id_list.append(order.id_teacher)
 
     for el in id_list:
         teacher_list.append(Teachers.query.filter_by(id=el).first())
+        
+    user_list = []
+    
+    for el in teacher_list:
+        user_list.append(Users.query.filter_by(id=el.id_user).first())
+        
+   
 
     if request.method == 'POST':
         name = request.form.get('name')
@@ -212,7 +273,7 @@ def profile():
         db.session.commit()
         flash("Профиль обновлен!", category="ok")
         return redirect(url_for("profile"))
-    return render_template("profile.html",teacher_list=teacher_list)
+    return render_template("profile.html",teacher_list=teacher_list,teacher=teacher,user_list=user_list,student_list=student_list,zip=zip)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -236,9 +297,10 @@ def reg():
     if request.method == 'POST':
         try:
             name = request.form.get('name')
+            surname = request.form.get('surname')
             email = request.form.get('email')
             password = request.form.get('password')
-            user = Users(name=name,email=email,password=md5(password.encode()).hexdigest())
+            user = Users(name=name,surname=surname,email=email,password=md5(password.encode()).hexdigest())
             db.session.add(user)
             db.session.commit()
             flash("Регистрация прошла успешно!", category="ok")
@@ -261,9 +323,8 @@ def teacher(id):
         for order in orders:
             id_list.append(order.id_teacher)
     teacher = Teachers.query.get(id)
+    user = Users.query.filter_by(id = teacher.id_user).first()
     if request.method == 'POST':
-        teacher.name = request.form.get('name')
-        teacher.surname = request.form.get('surname')
         teacher.subject = request.form.get('category')
         teacher.price = request.form.get('price')
         teacher.desciption = request.form.get('ckeditor')
@@ -276,16 +337,40 @@ def teacher(id):
         db.session.commit()
         flash("Запись обновлена!", category="ok")
         return redirect(url_for("teacher", id=teacher.id))
-    return render_template("teacher.html",teacher=teacher,id_list=id_list)
+    return render_template("teacher.html",teacher=teacher,id_list=id_list,user=user)
+
+
+@app.route('/edit_teacher/<int:id>', methods=['GET', 'POST'])
+def edit_teacher(id):
+     teacher = Teachers.query.get(id)
+     if request.method == 'POST':
+        teacher.subject = request.form.get('category')
+        teacher.price = request.form.get('price')
+        teacher.desciption = request.form.get('ckeditor')
+        image = request.files['image']
+        if image:
+            filename = secure_filename(image.filename)
+            pic_name = str(uuid.uuid4()) + "_" + filename
+            image.save("static/img/upload/" + pic_name)
+            teacher.image_name = pic_name
+        db.session.commit()
+        flash("Запись обновлена!", category="ok")
+        return redirect(url_for("profile"))
 
 
 @app.route('/delete-teacher/<int:id>')
 def delete_teacher(id):
     obj = Teachers.query.filter_by(id=id).first()
+    user = Users.query.filter_by(id=obj.id_user).first()
+    orders = Orders.query.filter_by(id_teacher=obj.id).all()
+    for el in orders:
+        db.session.delete(el)
+    user.root = 0
     db.session.delete(obj)
+    
     db.session.commit()
     flash("Запись удалена!", category="bad")
-    return redirect('/')
+    return redirect('/profile')
 
 
 @app.route('/delete-article/<int:id>')

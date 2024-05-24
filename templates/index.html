@@ -18,12 +18,7 @@ TEACHER
 </div>
 <main>
     
-    {%if 'name' in session and active_user.root==1%}
-    <!-- Кнопка-триггер модального окна -->
-    <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal">
-        Добавить преподавателя
-    </button>
-    {%endif%}
+
 
 
     {% with messages = get_flashed_messages(True) %}
@@ -78,12 +73,12 @@ TEACHER
     </div>
     <div class="album py-5">
         <div class="row row-cols-sm-2 g-3">
-            {%for teacher in teachers%}
+            {%for teacher,user in zip(teachers,users_list)%}
             <div class="col">
                 <div class="card shadow-sm">
                     <img src="../static/img/upload/{{teacher.image_name}}" height="" alt="">
                     <div class="card-body">
-                        <h4>{{teacher.name}} {{teacher.surname}}</h4>
+                        <h4>{{user.name}} {{user.surname}}</h4>
                  
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="btn-group">

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block title %}
-Репетитор {{teacher.name}} {{teacher.surname}}
+Репетитор {{user.name}} {{user.surname}}
 {% endblock %}
 
 {% block main %}
@@ -19,23 +19,13 @@
             <img src="../static/img/upload/{{teacher.image_name}}" alt="" class="img-fluid">
         </div>
         <div class="col-md-6">
-            <h1>{{teacher.name}} {{teacher.surname}}</h1>
+            <h1>{{user.name}} {{user.surname}}</h1>
             <h3>Дисциплина: {{teacher.subject}}</h3>
             <h3>Цена: {{teacher.price}}/ч</h3>
             <h3>Описание</h3>
             {% autoescape false %}
             {{teacher.desciption}}
             {% endautoescape %}
-
-            {%if 'name' in session and teacher.id not in id_list%}
-            <a href="/order/{{teacher.id}}" class="btn btn-primary">Заказать репетитора</a>
-
-            {%elif teacher.id in id_list%}
-            <a href="/order-delete/{{teacher.id}}" class="btn btn-outline-danger">Отказаться от репетитора</a>
-            {%else%}
-            <h3>Заказать репетитора можно только зарегестрированным пользователям!</h3>
-            {%endif%}
-
 
             {%if 'name' in session and active_user.root==1%}
             <!-- Кнопка-триггер модального окна -->
@@ -44,7 +34,29 @@
             </button>
 
             <a href="/delete-teacher/{{teacher.id}}" class="btn btn-danger">Удалить</a>
+            {%else %}
+         
+
+
+            {%if user.email==active_user.email %}
+            <h3>Это ваша анкета!</h3>
+            {%else%}
+
+            {%if 'name' in session and teacher.id not in id_list and active_user.root==0%}
+            <a href="/order/{{teacher.id}}" class="btn btn-primary">Заказать репетитора</a>
+
+            {%elif teacher.id in id_list%}
+            <a href="/order-delete/{{teacher.id}}" class="btn btn-outline-danger">Отказаться от репетитора</a>
+
+            {%elif active_user.root==2%}
+            <h3>Репетиторы не могут заказывать других репетиторов!</h3>
+            {%else%}
+            <h3>Заказать репетитора можно только зарегестрированным пользователям!</h3>
             {%endif%}
+            {%endif%}
+            {%endif%}
+
+           
             <!-- Модальное окно -->
 
             <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
@@ -58,16 +70,6 @@
                         </div>
                         <div class="modal-body">
                             <form method="post" enctype="multipart/form-data">
-                                <div class="mb-3">
-                                    <h3>Имя</h3>
-                                    <input type="text" class="form-control" placeholder="Имя" required name="name"
-                                        value="{{teacher.name}}">
-                                </div>
-                                <div class="mb-3">
-                                    <h3>Фамилия</h3>
-                                    <input type="text" class="form-control" placeholder="Фамилия" required
-                                        name="surname" value="{{teacher.surname}}">
-                                </div>
                                 <div class="mb-3">
                                     <h3>Цена\час</h3>
                                     <input type="number" class="form-control" placeholder="Цена" required name="price"
