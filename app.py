@@ -29,6 +29,7 @@ class Users(db.Model):
     email = db.Column(db.String(100), unique=True)
     password = db.Column(db.String(100), unique=True)
     root = db.Column(db.Integer, default=0)
+    likes = db.Column(db.Integer, default=0)
    
     def __repr__(self):
         return 'User %r' % self.id 
@@ -52,11 +53,24 @@ class Teachers(db.Model):
     price = db.Column(db.Integer)
     subject = db.Column(db.String(100))
     image_name = db.Column(db.String(100))
+    city = db.Column(db.String(100))
     id_user = db.Column(db.Integer, db.ForeignKey('users.id'))
     status = db.Column(db.Integer, default=0)
+    
    
     def __repr__(self):
         return 'Teachers %r' % self.id 
+
+
+class Comments(db.Model):
+    id = db.Column(db.Integer,primary_key=True)
+    name = db.Column(db.String(100))
+    text = db.Column(db.Text)
+    date = db.Column(db.DateTime, default=datetime.now)
+    id_article = db.Column(db.Integer, db.ForeignKey('teachers.id'))
+
+    def __repr__(self):
+        return 'Comments %r' % self.id 
 
 
 class Orders(db.Model):
@@ -103,8 +117,15 @@ admin.add_view(OrdersView(Orders, db.session))
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
+
+     
+
     teachers = Teachers.query.all()
     
+    comments_count = []
+    for el in teachers:
+        comments_count.append(Comments.query.filter_by(id_article=el.id).count())  
+
     users_ids = []
     for teacher in teachers:
         users_ids.append(teacher.id_user)
@@ -118,12 +139,13 @@ def index():
         surname = request.form.get('surname')
         subject = request.form.get('category')
         price = request.form.get('price')
+        city = request.form.get('city')
         desciption = request.form.get('ckeditor')
         image = request.files['image']
         filename = secure_filename(image.filename)
         pic_name = str(uuid.uuid4()) + "_" + filename
         image.save("static/img/upload/" + pic_name)
-        teacher = Teachers(name=name,surname=surname,price=price, subject=subject,desciption=desciption,image_name=pic_name)
+        teacher = Teachers(name=name,surname=surname,price=price,city=city, subject=subject,desciption=desciption,image_name=pic_name)
         db.session.add(teacher)
         db.session.commit()
         flash("Запись добавлена!", category="ok")
@@ -135,12 +157,24 @@ def index():
             subject= subject.capitalize()
             subject = "%{}%".format(subject)
             teachers = Teachers.query.filter(Teachers.subject.like(subject)).all()
-            return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list)
+            users_ids = []
+            
+            for teacher in teachers:
+                users_ids.append(teacher.id_user)
+                
+            users_list = []
+            for id in users_ids:
+                users_list.append(Users.query.get(id))
+
+            comments_count = []
+            for el in teachers:
+                comments_count.append(Comments.query.filter_by(id_article=el.id).count()) 
+
+            return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list,comments_count=comments_count)
         else:
-             return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list)
+            return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list,comments_count=comments_count)
 
-    return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list)
-
+    return render_template("index.html",zip=zip,teachers=teachers,users_list=users_list,comments_count=comments_count)
 
 @app.route('/add_teacher/<int:id_user>', methods=['GET', 'POST'])
 def add_teacher(id_user):
@@ -152,11 +186,12 @@ def add_teacher(id_user):
         subject = request.form.get('category')
         price = request.form.get('price')
         desciption = request.form.get('ckeditor')
+        city = request.form.get('city')
         image = request.files['image']
         filename = secure_filename(image.filename)
         pic_name = str(uuid.uuid4()) + "_" + filename
         image.save("static/img/upload/" + pic_name)
-        teacher = Teachers(price=price, subject=subject,desciption=desciption,image_name=pic_name,id_user=total_user.id)
+        teacher = Teachers(price=price, subject=subject,desciption=desciption,city=city,image_name=pic_name,id_user=total_user.id)
         db.session.add(teacher)
         db.session.commit()
         flash("Запись добавлена!", category="ok")
@@ -322,11 +357,13 @@ def teacher(id):
         orders = Orders.query.filter_by(id_user=total_user.id).all()
         for order in orders:
             id_list.append(order.id_teacher)
+    comments = Comments.query.filter_by(id_article=id).all()
     teacher = Teachers.query.get(id)
     user = Users.query.filter_by(id = teacher.id_user).first()
     if request.method == 'POST':
         teacher.subject = request.form.get('category')
         teacher.price = request.form.get('price')
+        teacher.city = request.form.get('city')
         teacher.desciption = request.form.get('ckeditor')
         image = request.files['image']
         if image:
@@ -337,7 +374,27 @@ def teacher(id):
         db.session.commit()
         flash("Запись обновлена!", category="ok")
         return redirect(url_for("teacher", id=teacher.id))
-    return render_template("teacher.html",teacher=teacher,id_list=id_list,user=user)
+    return render_template("teacher.html",teacher=teacher,id_list=id_list,user=user,comments=comments)
+
+
+@app.route('/add_likes/<int:id_user>/<int:id_teacher>', methods=['GET', 'POST'])
+def add_likes(id_user,id_teacher):
+    user = Users.query.get(id_user)
+    user.likes += 1
+    db.session.commit()
+    flash("Вы поставили лайк!", category="ok")
+    return redirect(url_for("teacher", id=id_teacher))
+
+@app.route('/add_comment/<int:id_article>', methods=['GET', 'POST'])
+def add_comment(id_article):
+    if request.method == 'POST':
+        name = request.form.get('name')
+        text = request.form.get('text')
+        comment = Comments(name=name, text=text, id_article=id_article)
+        db.session.add(comment)
+        db.session.commit()
+        flash("Комментарий добавлен!", category="ok")
+    return redirect(url_for("teacher", id=id_article))
 
 
 @app.route('/edit_teacher/<int:id>', methods=['GET', 'POST'])
@@ -346,6 +403,7 @@ def edit_teacher(id):
      if request.method == 'POST':
         teacher.subject = request.form.get('category')
         teacher.price = request.form.get('price')
+        teacher.city = request.form.get('city')
         teacher.desciption = request.form.get('ckeditor')
         image = request.files['image']
         if image:

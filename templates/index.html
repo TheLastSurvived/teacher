@@ -47,7 +47,10 @@ TEACHER
                             <input type="text" class="form-control" placeholder="Фамилия" required name="surname">
                         </div>
                         <div class="mb-3">
-                            <input type="number" class="form-control" placeholder="Цена" required name="price">
+                            <input type="number" class="form-control" placeholder="Цена руб/ч" required name="price">
+                        </div>
+                        <div class="mb-3">
+                            <input type="text" class="form-control" placeholder="Город" required name="city">
                         </div>
                         <div class="mb-3">
                             <input type="text" class="form-control" placeholder="Категория" required name="category">
@@ -73,10 +76,11 @@ TEACHER
     </div>
     <div class="album py-5">
         <div class="row row-cols-sm-2 g-3">
-            {%for teacher,user in zip(teachers,users_list)%}
+            {%for teacher,user,comments in zip(teachers,users_list,comments_count)%}
             <div class="col">
                 <div class="card shadow-sm">
-                    <img src="../static/img/upload/{{teacher.image_name}}" height="" alt="">
+                    <a href="/teacher/{{teacher.id}}"><img src="../static/img/upload/{{teacher.image_name}}" class="img-fluid" width="100%" height="" alt=""></a>
+                    
                     <div class="card-body">
                         <h4>{{user.name}} {{user.surname}}</h4>
                  
@@ -84,7 +88,17 @@ TEACHER
                             <div class="btn-group">
                                 <a href="/teacher/{{teacher.id}}" class="btn btn-sm btn-outline-secondary">Смотреть</a>
                             </div>
-                            <small class="text-body-secondary">{{teacher.subject}}</small>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <small class="text-body-secondary"><img src="../static/img/like.png" alt="like" class="" width="20"> {{user.likes}} </small>
+                                    <small class="text-body-secondary mx-2"><img src="../static/img/comment.png" alt="comment" class="" width="20"> {{comments}}</small>
+                                </div>
+                                
+                                <div>
+                                    <small class="text-body-secondary">{{teacher.subject}}</small>
+                                </div>
+                            </div>
+                            
                         </div>
                     </div>
                 </div>

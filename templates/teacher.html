@@ -16,16 +16,24 @@
         {% endif %}
         {% endwith %}
         <div class="col-md-6">
-            <img src="../static/img/upload/{{teacher.image_name}}" alt="" class="img-fluid">
+            <a href="../static/img/upload/{{teacher.image_name}}"><img src="../static/img/upload/{{teacher.image_name}}" alt="" class="img-fluid"></a>
+            
         </div>
         <div class="col-md-6">
             <h1>{{user.name}} {{user.surname}}</h1>
             <h3>Дисциплина: {{teacher.subject}}</h3>
-            <h3>Цена: {{teacher.price}}/ч</h3>
+            <h3>Цена : {{teacher.price}} руб/ч</h3>
+            <h3>Город : {{teacher.city}}</h3>
             <h3>Описание</h3>
             {% autoescape false %}
             {{teacher.desciption}}
             {% endautoescape %}
+
+
+            <div class="my-3">
+                <h3>Лайки: {{user.likes}}</h3>
+                <a href="/add_likes/{{user.id}}/{{teacher.id}}" class="btn btn-primary">Мне нравится!</a>
+            </div>
 
             {%if 'name' in session and active_user.root==1%}
             <!-- Кнопка-триггер модального окна -->
@@ -71,14 +79,18 @@
                         <div class="modal-body">
                             <form method="post" enctype="multipart/form-data">
                                 <div class="mb-3">
-                                    <h3>Цена\час</h3>
-                                    <input type="number" class="form-control" placeholder="Цена" required name="price"
+                                    <h3>Цена руб/ч</h3>
+                                    <input type="number" class="form-control" placeholder="Цена руб/ч" required name="price"
                                         value="{{teacher.price}}">
                                 </div>
                                 <div class="mb-3">
                                     <h3>Категория</h3>
                                     <input type="text" class="form-control" placeholder="Категория" required
                                         name="category" value="{{teacher.subject}}">
+                                </div>
+                                <div class="mb-3">
+                                    <input type="text" class="form-control" placeholder="Город" required
+                                        name="city" value="{{teacher.subject}}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="exampleInputEmail1" class="form-label">Изображение</label>
@@ -99,9 +111,45 @@
                     </div>
                 </div>
             </div>
-
+            
         </div>
 
     </div>
+    <hr>
+    <div class="my-3">
+        <h2>Добавить комментарий:</h2>
+        <form action="{{ url_for('add_comment', id_article=teacher.id) }}" method="post" class="w-50">
+          <div class="mb-3">
+            <label for="exampleFormControlInput1" class="form-label">Ваше имя</label>
+            <input type="text" class="form-control" id="exampleFormControlInput1" name="name" required>             
+          </div>
+          <div class="mb-3">
+            <label for="exampleFormControlTextarea1" class="form-label">Ваш комментарий:</label>
+            <textarea class="form-control" id="exampleFormControlTextarea1" name="text" rows="5" required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary">Добавить</button>
+        </form>
+
+        
+        <hr>
+        <div>
+          <h2>Комментарии:</h2>
+
+          {%if comments%}
+
+          {%for comment in comments%}
+          <div class="border border-primary rounded p-3 my-4">
+            <p>{{comment.text}}</p>
+            <small>{{comment.date.strftime('%d.%m.%Y %H:%M')}}</small>
+            <p class="text-end">От {{comment.name}}</p>
+          </div>
+          {%endfor%}
+
+          {%else%}
+            <p class="text-center">Комментариев нет!</p>
+          {%endif%}
+        </div>
+      </div>
+
 </main>
 {% endblock %}
