@@ -1,9 +1,8 @@
-{% extends 'base.html' %} {% block title %} Регистрация {% endblock %} {% block
-main %}
-
+{% extends 'base.html' %} {% block title %} Регистрация как репетитор {%
+endblock %} {% block main %} {{ ckeditor.load() }}
 <main class="">
-  <form class="w-50 mx-auto" method="post">
-    <h1 class="">Регистрация</h1>
+  <form class="w-75 mx-auto" method="post" enctype="multipart/form-data">
+    <h1 class="">Регистрация как репетитор</h1>
     {% with messages = get_flashed_messages(True) %} {% if messages %} {% for
     category, message in messages %}
     <p class="m-2 flash {{category}}">{{message}}</p>
@@ -59,10 +58,55 @@ main %}
         minlength="5"
       />
     </div>
+    <div class="mb-3">
+      <input
+        type="number"
+        class="form-control"
+        placeholder="Цена руб/ч"
+        required
+        name="price"
+      />
+    </div>
+    <div class="mb-3">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Предмет"
+        required
+        name="category"
+        maxlength="30"
+        minlength="5"
+      />
+    </div>
+    <div class="mb-3">
+      <input
+        type="text"
+        class="form-control"
+        placeholder="Город"
+        required
+        name="city"
+        maxlength="20"
+        minlength="5"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="exampleInputEmail1" class="form-label">Изображение</label>
+      <input
+        type="file"
+        class="form-control"
+        id="exampleInputEmail1"
+        aria-describedby="emailHelp"
+        name="image"
+        required
+        accept=".jpg,.jpeg,.png"
+      />
+    </div>
+    <div class="mb-3">
+      <h3>Описание</h3>
+      {{ ckeditor.create() }}
+    </div>
+
     <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
   </form>
-  <div class="text-center my-5">
-    <a href="/teacher_reg">Зарегистрироваться как репетитор!</a>
-  </div>
 </main>
 {% endblock %}

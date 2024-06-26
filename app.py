@@ -85,14 +85,43 @@ class Orders(db.Model):
 class AdminIndex(AdminIndexView):
     @expose('/', methods=['GET', 'POST'])
     def index(self):
-        if 'name' in session:
-            user = Users.query.filter_by(email=session['name']).first()
+        if request.method == 'POST':
+            email = request.form.get('email')
+            password = md5(request.form.get('password').encode()).hexdigest()
+           
+            user = Users.query.filter_by(email=email,password=password).first()
+            
+            if user:
+                session['admin'] = Users.query.filter_by(email=email).first().email
+                return self.render('admin/dashboard_index.html')
+            else:
+                flash("Неправильная почта или пароль!", category="bad")
+                return redirect(url_for("admin.login_admin"))
+        if 'admin' in session:
+            user = Users.query.filter_by(email=session['admin']).first()
             if user.root!=1:
-                abort(403)
+                return self.render('admin/admin_login.html')
             else:
                 return self.render('admin/dashboard_index.html')
         else:
-            abort(401)
+            return self.render('admin/admin_login.html')
+        
+    @expose('/login_admin', methods=['GET', 'POST'])
+    def login_admin(self): 
+        if request.method == 'POST':
+            email = request.form.get('email')
+            password = md5(request.form.get('password').encode()).hexdigest()
+           
+            user = Users.query.filter_by(email=email,password=password).first()
+            
+            if user:
+                session['admin'] = Users.query.filter_by(email=email).first().email
+                return self.render('admin/dashboard_index.html')
+            else:
+                flash("Неправильная почта или пароль!", category="bad")
+                return redirect(url_for("admin.login_admin"))
+        return self.render('admin/admin_login.html')
+                
 
 
 admin = Admin(app, name='Teacher', template_mode='bootstrap3',index_view=AdminIndex())
@@ -347,6 +376,40 @@ def reg():
     return render_template("reg.html")
 
 
+@app.route('/teacher_reg', methods=['GET', 'POST'])
+def teacher_reg():
+    if request.method == 'POST':
+        #try:
+        name = request.form.get('name')
+        surname = request.form.get('surname')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = Users(name=name,surname=surname,email=email,password=md5(password.encode()).hexdigest() ,root=2)
+        db.session.add(user)
+        db.session.commit()
+        subject = request.form.get('category')
+        price = request.form.get('price')
+        desciption = request.form.get('ckeditor')
+        city = request.form.get('city')
+        image = request.files['image']
+        filename = secure_filename(image.filename)
+        pic_name = str(uuid.uuid4()) + "_" + filename
+        image.save("static/img/upload/" + pic_name)
+        teacher = Teachers(price=price, subject=subject,desciption=desciption,city=city,image_name=pic_name,id_user=user.id)
+        db.session.add(teacher)
+        
+        db.session.commit()
+        flash("Регистрация прошла успешно!", category="ok")
+        return redirect(url_for("teacher_reg"))
+    ''' except:
+        flash("Произошла ошибка! Проверьте введенные данные!", category="bad")
+        db.session.rollback()
+        return redirect(url_for("teacher_reg"))'''
+    return render_template("teacher_reg.html")
+
+
+
+
 @app.route('/teacher/<int:id>', methods=['GET', 'POST'])
 def teacher(id):
     total_user = object
@@ -463,6 +526,11 @@ def order_delete(id_teacher):
 @app.route('/logout')
 def logout():
     session.pop('name', None)
+    return redirect('/')
+
+@app.route('/admin_logout')
+def admin_logout():
+    session.pop('admin', None)
     return redirect('/')
 
 

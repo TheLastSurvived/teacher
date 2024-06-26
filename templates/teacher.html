@@ -25,9 +25,12 @@
             <h3>Цена : {{teacher.price}} руб/ч</h3>
             <h3>Город : {{teacher.city}}</h3>
             <h3>Описание</h3>
-            {% autoescape false %}
-            {{teacher.desciption}}
-            {% endautoescape %}
+            <div class="text-wrap">
+                {% autoescape false %}
+                {{teacher.desciption}}
+                {% endautoescape %}
+            </div>
+            
 
 
             <div class="my-3">
@@ -59,7 +62,7 @@
             {%elif active_user.root==2%}
             <h3>Репетиторы не могут заказывать других репетиторов!</h3>
             {%else%}
-            <h3>Заказать репетитора можно только зарегестрированным пользователям!</h3>
+            <h3>Заказать репетитора можно только зарегистрированным пользователям!</h3>
             {%endif%}
             {%endif%}
             {%endif%}

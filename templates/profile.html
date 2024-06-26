@@ -74,6 +74,11 @@
                                         name="category" value="{{teacher.subject}}">
                                 </div>
                                 <div class="mb-3">
+                                    <h3>Город</h3>
+                                    <input type="text" class="form-control" placeholder="Категория" required
+                                        name="city" value="{{teacher.city}}">
+                                </div>
+                                <div class="mb-3">
                                     <label for="exampleInputEmail1" class="form-label">Изображение</label>
                                     <input type="file" class="form-control" id="exampleInputEmail1"
                                         aria-describedby="emailHelp" name="image" accept=".jpg,.jpeg,.png">
@@ -94,58 +99,9 @@
             </div>
 
 
-            <a href="/delete-teacher/{{teacher.id}}" class="btn btn-outline-danger">Удалить анкету репетитора</a>
             {%endif%}
 
-            {%if 'name' in session and active_user.root==0%}
-            <button type="button" class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                Заполнить анкету репетитора
-            </button>
-
-            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
-                <div class="modal-dialog modal-lg modal-dialog-centered">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="exampleModalLabel">Заполнить анкету репетитора</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                aria-label="Закрыть"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form method="post" enctype="multipart/form-data"
-                                action="{{url_for('add_teacher', id_user=active_user.id) }}">
-                                <div class="mb-3">
-                                    <input type="number" class="form-control" placeholder="Цена руб/ч" required
-                                        name="price">
-                                </div>
-                                <div class="mb-3">
-                                    <input type="text" class="form-control" placeholder="Предмет" required
-                                        name="category">
-                                </div>
-                                <div class="mb-3">
-                                    <input type="text" class="form-control" placeholder="Город" required
-                                        name="city">
-                                </div>
-                                <div class="mb-3">
-                                    <label for="exampleInputEmail1" class="form-label">Изображение</label>
-                                    <input type="file" class="form-control" id="exampleInputEmail1"
-                                        aria-describedby="emailHelp" name="image" required accept=".jpg,.jpeg,.png">
-                                </div>
-                                <div class="mb-3">
-                                    <h3>Описание</h3>
-                                    {{ ckeditor.create() }}
-                                </div>
-
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
-                            <button type="submit" class="btn btn-primary">Заполнить</button>
-                        </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            {%endif%}
+       
 
         </div>
 
