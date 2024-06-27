@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, flash, redirect, session, url_for, abort
+from flask import Flask, render_template, request, flash, redirect, session, url_for, abort, make_response
 from flask_sqlalchemy import SQLAlchemy
 from flask_ckeditor import CKEditor
 from datetime import datetime
@@ -379,36 +379,33 @@ def reg():
 @app.route('/teacher_reg', methods=['GET', 'POST'])
 def teacher_reg():
     if request.method == 'POST':
-        #try:
-        name = request.form.get('name')
-        surname = request.form.get('surname')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        user = Users(name=name,surname=surname,email=email,password=md5(password.encode()).hexdigest() ,root=2)
-        db.session.add(user)
-        db.session.commit()
-        subject = request.form.get('category')
-        price = request.form.get('price')
-        desciption = request.form.get('ckeditor')
-        city = request.form.get('city')
-        image = request.files['image']
-        filename = secure_filename(image.filename)
-        pic_name = str(uuid.uuid4()) + "_" + filename
-        image.save("static/img/upload/" + pic_name)
-        teacher = Teachers(price=price, subject=subject,desciption=desciption,city=city,image_name=pic_name,id_user=user.id)
-        db.session.add(teacher)
-        
-        db.session.commit()
-        flash("Регистрация прошла успешно!", category="ok")
-        return redirect(url_for("teacher_reg"))
-    ''' except:
-        flash("Произошла ошибка! Проверьте введенные данные!", category="bad")
-        db.session.rollback()
-        return redirect(url_for("teacher_reg"))'''
+        try:
+            name = request.form.get('name')
+            surname = request.form.get('surname')
+            email = request.form.get('email')
+            password = request.form.get('password')
+            user = Users(name=name,surname=surname,email=email,password=md5(password.encode()).hexdigest() ,root=2)
+            db.session.add(user)
+            db.session.commit()
+            subject = request.form.get('category')
+            price = request.form.get('price')
+            desciption = request.form.get('ckeditor')
+            city = request.form.get('city')
+            image = request.files['image']
+            filename = secure_filename(image.filename)
+            pic_name = str(uuid.uuid4()) + "_" + filename
+            image.save("static/img/upload/" + pic_name)
+            teacher = Teachers(price=price, subject=subject,desciption=desciption,city=city,image_name=pic_name,id_user=user.id)
+            db.session.add(teacher)
+            
+            db.session.commit()
+            flash("Регистрация прошла успешно!", category="ok")
+            return redirect(url_for("teacher_reg"))
+        except:
+            flash("Произошла ошибка! Проверьте введенные данные!", category="bad")
+            db.session.rollback()
+            return redirect(url_for("teacher_reg"))
     return render_template("teacher_reg.html")
-
-
-
 
 @app.route('/teacher/<int:id>', methods=['GET', 'POST'])
 def teacher(id):
@@ -444,7 +441,10 @@ def teacher(id):
 def add_likes(id_user,id_teacher):
     user = Users.query.get(id_user)
     user.likes += 1
+    res = make_response("")
+    res.set_cookie('foo', 'foo', max_age=3600)
     db.session.commit()
+    
     flash("Вы поставили лайк!", category="ok")
     return redirect(url_for("teacher", id=id_teacher))
 

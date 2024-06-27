@@ -79,7 +79,7 @@ TEACHER
             {%for teacher,user,comments in zip(teachers,users_list,comments_count)%}
             <div class="col">
                 <div class="card shadow-sm">
-                    <a href="/teacher/{{teacher.id}}"><img src="../static/img/upload/{{teacher.image_name}}" class="img-fluid" width="100%" height="" alt=""></a>
+                    <a href="/teacher/{{teacher.id}}"><img src="../static/img/upload/{{teacher.image_name}}" class="img-fluid" width="100%"  alt=""></a>
                     
                     <div class="card-body">
                         <h4>{{user.name}} {{user.surname}}</h4>

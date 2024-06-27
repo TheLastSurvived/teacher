@@ -48,7 +48,7 @@
         </div>
     </div>
 
-    {%if 'name' in session and active_user.root==1%}
+    {%if 'admin' in session%}
     <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal">
         Изменить
     </button>

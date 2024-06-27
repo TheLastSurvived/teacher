@@ -15,10 +15,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        <div class="col-md-6">
-            <a href="../static/img/upload/{{teacher.image_name}}"><img src="../static/img/upload/{{teacher.image_name}}" alt="" class="img-fluid"></a>
-            
-        </div>
+        
         <div class="col-md-6">
             <h1>{{user.name}} {{user.surname}}</h1>
             <h3>Дисциплина: {{teacher.subject}}</h3>
@@ -35,10 +32,14 @@
 
             <div class="my-3">
                 <h3>Лайки: {{user.likes}}</h3>
+                {%if 'name' in session %}
                 <a href="/add_likes/{{user.id}}/{{teacher.id}}" class="btn btn-primary">Мне нравится!</a>
+                {%else%}
+                <small>Авторизуйтесь чтобы оставлять лайки и писать комментарии!</small>
+                {%endif%}
             </div>
 
-            {%if 'name' in session and active_user.root==1%}
+            {%if 'admin' in session%}
             <!-- Кнопка-триггер модального окна -->
             <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 Изменить
@@ -92,8 +93,9 @@
                                         name="category" value="{{teacher.subject}}">
                                 </div>
                                 <div class="mb-3">
+                                    <h3>Город</h3>
                                     <input type="text" class="form-control" placeholder="Город" required
-                                        name="city" value="{{teacher.subject}}">
+                                        name="city" value="{{teacher.city}}">
                                 </div>
                                 <div class="mb-3">
                                     <label for="exampleInputEmail1" class="form-label">Изображение</label>
@@ -116,10 +118,14 @@
             </div>
             
         </div>
-
+        <div class="col-md-6">
+            <a href="../static/img/upload/{{teacher.image_name}}"><img src="../static/img/upload/{{teacher.image_name}}" alt="" class="img-fluid"></a>
+            
+        </div>
     </div>
     <hr>
     <div class="my-3">
+        {%if 'name' in session and active_user %}
         <h2>Добавить комментарий:</h2>
         <form action="{{ url_for('add_comment', id_article=teacher.id) }}" method="post" class="w-50">
           <div class="mb-3">
@@ -130,11 +136,13 @@
             <label for="exampleFormControlTextarea1" class="form-label">Ваш комментарий:</label>
             <textarea class="form-control" id="exampleFormControlTextarea1" name="text" rows="5" required></textarea>
           </div>
-          <button type="submit" class="btn btn-primary">Добавить</button>
-        </form>
-
         
+          <button type="submit" class="btn btn-primary">Добавить</button>
+
+          
+        </form>
         <hr>
+        {%endif%}
         <div>
           <h2>Комментарии:</h2>
 

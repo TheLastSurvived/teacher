@@ -15,7 +15,7 @@
         {%endfor%}
     </nav>
 </div>
-{%if 'name' in session and active_user.root==1%}
+{%if 'admin' in session%}
 <!-- Кнопка-триггер модального окна -->
 <button type="button" class="btn btn-outline-dark" data-bs-toggle="modal" data-bs-target="#exampleModal">
     Добавить запись
