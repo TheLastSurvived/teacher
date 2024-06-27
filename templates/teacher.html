@@ -130,7 +130,7 @@
         <form action="{{ url_for('add_comment', id_article=teacher.id) }}" method="post" class="w-50">
           <div class="mb-3">
             <label for="exampleFormControlInput1" class="form-label">Ваше имя</label>
-            <input type="text" class="form-control" id="exampleFormControlInput1" name="name" required>             
+            <input type="text" class="form-control" id="exampleFormControlInput1" name="name" required value="{{active_user.name}} {{active_user.surname}}">             
           </div>
           <div class="mb-3">
             <label for="exampleFormControlTextarea1" class="form-label">Ваш комментарий:</label>
