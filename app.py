@@ -440,9 +440,11 @@ def teacher(id):
 @app.route('/add_likes/<int:id_user>/<int:id_teacher>', methods=['GET', 'POST'])
 def add_likes(id_user,id_teacher):
     user = Users.query.get(id_user)
+    if 'liked' in session:
+        flash("Вы уже поставили лайк!", category="bad")
+        return redirect(url_for("teacher", id=id_teacher))
     user.likes += 1
-    res = make_response("")
-    res.set_cookie('foo', 'foo', max_age=3600)
+    session['liked'] = 'liked'
     db.session.commit()
     
     flash("Вы поставили лайк!", category="ok")

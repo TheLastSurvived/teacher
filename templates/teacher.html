@@ -32,9 +32,11 @@
 
             <div class="my-3">
                 <h3>Лайки: {{user.likes}}</h3>
-                {%if 'name' in session %}
+                {%if 'name' in session and not 'liked' in session %}
                 <a href="/add_likes/{{user.id}}/{{teacher.id}}" class="btn btn-primary">Мне нравится!</a>
-                {%else%}
+                {%elif 'liked' in session  %}
+                <small>Вы уже ставили лайк!</small>
+                {%else%}    
                 <small>Авторизуйтесь чтобы оставлять лайки и писать комментарии!</small>
                 {%endif%}
             </div>
